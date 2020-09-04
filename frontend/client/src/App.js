@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import Escrow from './contracts/Escrow.json';
-import { getWeb3 } from './utils.js';
+import React, { Component } from "react";
+import { getWeb3 } from "./utils.js";
+import Escrow from "./contracts/Escrow.json";
 
 class App extends Component {
   state = {
@@ -8,53 +8,37 @@ class App extends Component {
     accounts: [],
     currentAccount: undefined,
     contract: undefined,
-    balance: undefined
-  }
+    balance: undefined,
+  };
 
   async componentDidMount() {
     const web3 = await getWeb3();
-    const accounts = await web3.eth.getAccounts();
-
-    const networkId = await web3.eth.net.getId();
+    const accounts = web3.eth.getAccounts();
+    const networkId = web3.eth.net.getId();
     const deployedNetwork = Escrow.networks[networkId];
     const contract = new web3.eth.Contract(
       Escrow.abi,
-      deployedNetwork && deployedNetwork.address,
+      deployedNetwork && deployedNetwork.address
     );
-
     this.setState({ web3, accounts, contract }, this.updateBalance);
-  };
+  }
 
   async updateBalance() {
     const { contract } = this.state;
-    const balance = await contract.methods.balanceOf().call();
+    const balance = await contract.methods.balanceOf.call();
     this.setState({ balance });
-  };
-
-  async deposit(e) {
-    e.preventDefault();
-    const { contract, accounts } = this.state;
-    await contract.methods.deposit().send({
-      from: accounts[0], 
-      value: e.target.elements[0].value
-    });
-    this.updateBalance();
   }
 
-  async release() {
-    const { contract, accounts } = this.state;
-    await contract.methods.release().send({
-      from: accounts[0], 
-    });
-    this.updateBalance();
+  async deposit(evt) {
+    evt.preventDefault();
+    const depositValue = evt.target.elements[0].value;
+    const { contract, balance } = this.state;
+    contract.methods.deposit().send({ from: accounts[0], value: depositValue });
   }
-
   render() {
     if (!this.state.web3) {
-      return <div>Loading...</div>;
+      return <div> Loading...</div>;
     }
-
-    const { balance } = this.state;
 
     return (
       <div className="container">
@@ -62,18 +46,22 @@ class App extends Component {
 
         <div className="row">
           <div className="col-sm-12">
-             <p>Balance: <b>{balance}</b> wei </p>
+            <p>
+              Balance: <b>{this.state.balance}</b> wei{" "}
+            </p>
           </div>
         </div>
 
         <div className="row">
           <div className="col-sm-12">
-            <form onSubmit={e => this.deposit(e)}>
+            <form onSubmit={(evt) => this.deposit(evt)}>
               <div className="form-group">
                 <label htmlFor="deposit">Deposit</label>
                 <input type="number" className="form-control" id="deposit" />
               </div>
-              <button type="submit" className="btn btn-primary">Submit</button>
+              <button type="submit" className="btn btn-primary">
+                Submit
+              </button>
             </form>
           </div>
         </div>
@@ -82,10 +70,11 @@ class App extends Component {
 
         <div className="row">
           <div className="col-sm-12">
-             <button onClick={() => this.release()} type="submit" className="btn btn-primary">Release</button>
+            <button type="submit" className="btn btn-primary">
+              Release
+            </button>
           </div>
         </div>
-
       </div>
     );
   }

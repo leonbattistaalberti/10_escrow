@@ -29,6 +29,7 @@ const getWeb3 = () => {
           "http://localhost:9545"
         );
         const web3 = new Web3(provider);
+        alert("Please enable Metamask");
         console.log("No web3 instance injected, using Local web3.");
         resolve(web3);
       }

@@ -33,7 +33,17 @@ class App extends Component {
     evt.preventDefault();
     const depositValue = evt.target.elements[0].value;
     const { contract, balance } = this.state;
-    contract.methods.deposit().send({ from: accounts[0], value: depositValue });
+    await contract.methods
+      .deposit()
+      .send({ from: accounts[0], value: depositValue });
+    this.updateBalance();
+  }
+
+  async release(evt) {
+    evt.preventDefault();
+    const { contract } = this.state;
+    await contract.methods.release.send({ from: accounts[0] });
+    this.updateBalance();
   }
   render() {
     if (!this.state.web3) {
@@ -70,7 +80,10 @@ class App extends Component {
 
         <div className="row">
           <div className="col-sm-12">
-            <button type="submit" className="btn btn-primary">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              onClick={(evt) => this.release(evt)}>
               Release
             </button>
           </div>
